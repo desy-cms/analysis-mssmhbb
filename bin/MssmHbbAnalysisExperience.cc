@@ -35,12 +35,20 @@ int main(int argc, char ** argv)
    
    MssmHbbAnalyser mssmhbb(argc,argv);
    
+   mssmhbb.jetHistograms(3,"precut");
+   mssmhbb.jetHistograms(3,"nominal");
+   
    // Analysis of events
    std::cout << "The sample size is " << mssmhbb.analysis()->size() << " events" << std::endl;
+   
+   int seed = mssmhbb.seed();
+   if ( seed > 0 ) std::cout << "Seed value for random number = " << seed << std::endl;
+   else            std::cout << "NO seed value for random number :( " << std::endl;
    
 // 
    for ( int i = 0 ; i < mssmhbb.nEvents() ; ++i )
    {
+      float weight = 1.;
       if ( i > 0 && i%100000==0 ) std::cout << i << "  events processed! " << std::endl;
       bool goodEvent = mssmhbb.event(i);
       if ( ! goodEvent ) continue;
@@ -52,6 +60,9 @@ int main(int argc, char ** argv)
       if ( ! mssmhbb.selectionJetId()         )   continue;
       if ( ! mssmhbb.selectionJetPileupId()   )   continue;
       if ( ! mssmhbb.selectionNJets()         )   continue;
+      
+      mssmhbb.fillJetHistograms("precut");
+
       
    //  1st and 2nd jet kinematic selection
       if ( ! mssmhbb.selectionJet(1)          )   continue;
@@ -90,10 +101,9 @@ int main(int argc, char ** argv)
          if ( ! mssmhbb.selectionNonBJet(3)   )   continue;
       }
       
-      mssmhbb.fillJetHistograms();
+      mssmhbb.fillJetHistograms("nominal",weight);
       
    }
-   mssmhbb.end();
    
 } //end main
 
