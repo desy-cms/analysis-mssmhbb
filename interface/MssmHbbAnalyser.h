@@ -48,10 +48,18 @@ namespace analysis {
 //             virtual void end();        
             // ----------member data ---------------------------
          protected:
+            bool do_tree_;
+            std::shared_ptr<TTree> mssmhbb_tree_;
+            double mbb_;
+            double mbbw_;
                
          private:
                
          public:
+           virtual bool muonJet(const bool & swap = true);
+           void fillMssmHbbTree();
+           void mssmHbbTree();
+           void fillMssmHbbHistograms();
 
       };
    }
