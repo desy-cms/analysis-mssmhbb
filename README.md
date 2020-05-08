@@ -6,6 +6,8 @@
 
 * [Installation](#Installation)
 * [Running the analysis](#Running-the-analysis)
+  * [Semileptonic channel](#Semileptonic-channel)
+  * [All-hadronic channel](#All-hadronic-channel) (to do)
   * [Main macro](#Main-macro)
   * [Configuration file](#Configuration-file)
   * [Workflow](#Workflow)
@@ -37,11 +39,15 @@ hash -r
 
 ## Running the analysis
 
-A macro with full analysis workflow can be found in [Analysis/MssmHbb/bin/MssmHbbAnalysis.cc](bin/MssmHbbAnalysis.cc) with the  configuration file in [Analysis/MssmHbb/test/mssmhbb_semilep_2017.cfg](test/mssmhbb_semilep_2017.cfg).
+A macro with the full analysis workflow for both semileptonic and all-hadronic channels can be found in [Analysis/MssmHbb/bin/MssmHbbAnalysis.cc](bin/MssmHbbAnalysis.cc)
 
-This macro perform the standard semileptonic analysis selection:
+### Semileptonic channel
 
-:warning: Unfortunately Github markdown does not render Latex equations :angry:
+The configuration file for the semileptonic analysis with 2017 data is available in the file [Analysis/MssmHbb/test/mssmhbb_semilep_2017.cfg](test/mssmhbb_semilep_2017.cfg).
+
+#### The semileptonic standard selection
+
+:warning: Unfortunately Github markdown does not render Latex equations :rage:
 
 * Trigger
   * HLT: HLT_Mu12_DoublePFJets40MaxDeta1p6_DoubleCaloBTagCSV_p33_v
@@ -63,6 +69,17 @@ This macro perform the standard semileptonic analysis selection:
 * Muon-Jet
   * At least one selected muon must be within one of the two leading jet: $\Delta R(\mu,jet)<0.4$
   
+
+### All-hadronic channel
+
+The configuration file for the semileptonic analysis is available in the file [Analysis/MssmHbb/test/mssmhbb_semilep_2017.cfg](test/mssmhbb_semilep_2017.cfg).
+
+#### The all-hadronic standard selection
+
+**TO DO** 
+
+:warning: Unfortunately Github markdown does not render Latex equations :rage:
+
 
 ### Main macro
 The structure of the macro is as follows:
@@ -183,7 +200,7 @@ For a selection, in which:
   * $\Delta R (jet_{i},jet_{j}) > 1$ ; $i,j=1,2,3$ ; $i\neq j$
   
 
-the configuration reads (:warning: notice that the order matters!):
+the configuration reads
 
 ```ini
 [Jets]
@@ -195,6 +212,8 @@ etaMax = 2.2
 etaMax = 2.2
 ...
 ```
+:warning: Notice that the order matters! First `ptMin` entry is for the leading jet, second `ptMin` is for the second leading jet, ...
+
 ```ini
 [Trigger.Objects]
 Jets.L1   = hltL1Mu12er2p3Jet40er2p3dRMax0p4DoubleJet40er2p3dEtaMax1p6_l1jet
@@ -219,7 +238,10 @@ wp = medium
 wp = medium
 algorithm = deepflavour
 ```
-where `wp` if the working point of each required b-tagged jet (:warning: notice that the order matters!)
+where `wp` if the working point of each required b-tagged jet.
+
+:warning: Notice that the order matters! First `wp` entry is for the leading jet, second `wp` is for the second leading jet, ...
+
 
 The values of the WP's must be given in the configuration file:
 ```ini
