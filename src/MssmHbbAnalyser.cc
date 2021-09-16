@@ -62,10 +62,7 @@ bool MssmHbbAnalyser::event(const int & i)
 {
    // parent function checks only json and run range validity
    if ( ! Analyser::event(i) ) return false;
-   
-// PILEUP RE-WEIGHT
-//   this->actionApplyPileupWeight(); 
-   
+      
    return true;
 }
 bool MssmHbbAnalyser::jetSelection()
