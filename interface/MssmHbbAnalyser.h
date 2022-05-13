@@ -46,7 +46,8 @@ namespace analysis {
             virtual bool muonJet(const bool & swap = false);
             void fillMssmHbbTree();
             void mssmHbbTree();
-            void fillMssmHbbHistograms();
+            void mssmHbbHistograms(const std::string & label="");
+            void fillMssmHbbHistograms(const std::string & label="");
             bool jetSelection();
             bool muonSelection();
             bool btagSelection();

@@ -42,7 +42,7 @@ MssmHbbAnalyser::MssmHbbAnalyser(int argc, char ** argv) : BaseAnalyser(argc,arg
    if ( do_tree_ ) this -> mssmHbbTree();
    mbb_ = -1.;
    this->jetHistograms(config_->nJetsMin(),"final_selection");
-   h1_["mssmhbb_mbb"] = std::make_shared<TH1F>("mbb","MSSM Hbb mbb", 30000,0,3000);   
+   this->mssmHbbHistograms();
 }
 
 MssmHbbAnalyser::~MssmHbbAnalyser()
@@ -62,10 +62,7 @@ bool MssmHbbAnalyser::event(const int & i)
 {
    // parent function checks only json and run range validity
    if ( ! Analyser::event(i) ) return false;
-   
-// PILEUP RE-WEIGHT
-//   this->actionApplyPileupWeight(); 
-   
+      
    return true;
 }
 bool MssmHbbAnalyser::jetSelection()
@@ -175,19 +172,85 @@ void MssmHbbAnalyser::mssmHbbTree()
    mssmhbb_tree_ -> Branch("weight",&mbbw_,"weight/D");
 }
 
-void MssmHbbAnalyser::fillMssmHbbHistograms()
+void MssmHbbAnalyser::fillMssmHbbHistograms(const std::string & label)
 {
-   ++ cutflow_;
-   if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
-      h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,"Fill MssmHbb Histograms");
+   this->output()->cd();
+   std::string cf_label = "Fill MssmHbb Histograms";
+   std::string prefix = "mssmhbb_";
+   if ( label != "" )
+   {
+      cf_label = Form("Fill MssmHbb Histograms - dir = %s", label.c_str());
+      this->output()->cd(label.c_str());
+      prefix = "";
+   }
    
+   auto njets = config_->nJetsMin();
+   std::string name;
+   std::string pname;
+   for ( int r = 1 ; r <= njets ; ++r )
+   {
+      int j1 = r-1;
+      auto jet_j1 = selectedJets_[j1];
+      
+      name  = Form("pt_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] -> Fill(jet_j1->pt(),weight_);
+      name  = Form("eta_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] -> Fill(jet_j1->eta(),weight_);
+      name  = Form("btag_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] -> Fill(JetAnalyser::btag(*jet_j1,config_->btagAlgorithm()),weight_);
+      for ( int r2 = r+1 ; r2 <= njets ; ++r2 )
+      {
+         if ( r2 == r ) continue;
+         int j2 = r2-1;
+         auto jet_j2 = selectedJets_[j2];
+         float mxy = 0.;
+         Composite<Jet,Jet> c_xy(*(jet_j1),*(jet_j2));
+         if ( config_->isMC() || !config_->signalRegion() ) mxy = c_xy.m();
+         name  = Form("m_jets%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+         h1_[pname] -> Fill(mxy,weight_);
+         
+      } 
+   }
+   // deprecated
    Composite<Jet,Jet> c_12(*(selectedJets_[0]),*(selectedJets_[1]));
    float mbb = 0.;
    if ( config_->isMC() || !config_->signalRegion() ) mbb = c_12.m();
+   name  = "mbb";  pname = Form("%s%s",prefix.c_str(),name.c_str());
+   h1_[pname] -> Fill(mbb,weight_);
+   //
    
-   h1_["mssmhbb_mbb"] -> Fill(mbb,weight_);
-   h1_["cutflow"] -> Fill(cutflow_,weight_);
+   cutflow(cf_label);
 
 }
 
 
+void MssmHbbAnalyser::mssmHbbHistograms(const std::string & label)
+{
+   this->output()->cd();
+   if ( label != "" )  this->output()->cd(label.c_str());
+   
+   auto njets = config_->nJetsMin();
+   std::string prefix = "mssmhbb_";
+   if ( label != "" ) prefix = "";
+   std::string name;
+   std::string pname;
+   for ( int r = 1 ; r <= njets ; ++r )
+   {
+      name  = Form("pt_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] = std::make_shared<TH1F>(name.c_str(),name.c_str(), 2000,0,2000);
+      name  = Form("eta_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] = std::make_shared<TH1F>(name.c_str(),name.c_str(), 100,-2.5,2.5);
+      name  = Form("btag_jet%d",r);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+      h1_[pname] = std::make_shared<TH1F>(name.c_str(),name.c_str(), 1000,0,1.);
+      for ( int r2 = r+1 ; r2 <= njets ; ++r2 )
+      {
+         if ( r2 == r ) continue;
+         name  = Form("m_jets%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+         h1_[pname] = std::make_shared<TH1F>(name.c_str(),name.c_str(), 3000,0,3000);
+         
+      } 
+   }
+   name  = "mbb";  pname = Form("%s%s",prefix.c_str(),name.c_str());
+   h1_[pname] = std::make_shared<TH1F>(name.c_str(),"MSSM Hbb mbb (deprecated?)", 3000,0,3000);
+   
+}
