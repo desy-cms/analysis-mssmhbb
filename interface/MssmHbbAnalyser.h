@@ -44,6 +44,7 @@ namespace analysis {
            
             virtual bool event(const int &i);
             virtual bool muonJet(const bool & swap = false);
+            virtual bool onlineMuonMatching();
             void fillMssmHbbTree();
             void mssmHbbTree();
             void mssmHbbHistograms(const std::string & label="");
