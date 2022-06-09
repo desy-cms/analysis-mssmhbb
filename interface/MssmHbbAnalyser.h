@@ -49,6 +49,7 @@ namespace analysis {
             void mssmHbbTree();
             void mssmHbbHistograms(const std::string & label="");
             void fillMssmHbbHistograms(const std::string & label="");
+            bool triggerSelection();
             bool jetSelection();
             bool muonSelection();
             bool btagSelection();
