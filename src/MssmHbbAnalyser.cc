@@ -64,19 +64,27 @@ bool MssmHbbAnalyser::event(const int & i)
    if ( ! Analyser::event(i) ) return false;
       
    return true;
+}bool MssmHbbAnalyser::triggerSelection()
+{
+   return ( this->selectionL1() && this->selectionHLT() );
 }
+
 bool MssmHbbAnalyser::jetSelection()
 {
       if ( ! this->selectionNJets()         )   return false;
+      // kinematics selection
       for ( int i = 1; i <= config_->nJetsMin(); ++i )
       {
-         // kinematics selection
          if ( ! this->selectionJet(i)          )   return false;
          if ( i <= 2  && (! this->onlineJetMatching(i))     )   return false;
-         // delta R selection
-         for ( int j = i+1; j <= config_->nJetsMin(); ++j )
-               if ( ! this->selectionJetDr(i,j)      )   return false;
       }
+      // delta R selection
+      for ( int i = 1; i <= config_->nJetsMin(); ++i )
+      {
+         for ( int j = i+1; j <= config_->nJetsMin(); ++j )
+            if ( ! this->selectionJetDr(i,j)      )   return false;
+      }
+      
       // delta eta jet selection
       if ( ! this->selectionJetDeta(1,2)    )   return false;
       
@@ -85,14 +93,32 @@ bool MssmHbbAnalyser::jetSelection()
 }
 bool MssmHbbAnalyser::btagSelection()
 {
-      for ( int i = 1; i <= config_->nBJetsMin(); ++i )
+   if ( ! this->onlineBJetMatching(1)    )   return false;
+   if ( ! this->onlineBJetMatching(2)    )   return false;
+   if ( config_->btagEfficiencies(1) == "" )
+   {
+      if ( ! this->selectionBJet(1)      )   return false;
+      if ( ! this->selectionBJet(2)      )   return false;
+      if ( ! this->selectionBJet(3)      )   return false;
+      this->actionApplyBtagSF(1);
+      this->actionApplyBtagSF(2);
+      this->actionApplyBtagSF(3);
+   }
+   else
+   {
+      this->actionApplyBtagEfficiency(1,1);
+      this->actionApplyBtagEfficiency(2,1);
+      if ( config_->signalRegion() )
       {
-         if ( ! this->selectionBJet(i)      )   return false;
-         this->actionApplyBtagSF(i);
-         if ( i<= 2 && ! this->onlineBJetMatching(i)    )   return false;
+         this->actionApplyBtagEfficiency(3,2);
       }
-      
-      return true;
+      else
+      {
+         if ( ! this->selectionBJet(3)      )   return false;
+         this->actionApplyBtagSF(3);
+      }
+   }
+   return true;
       
 }
 bool MssmHbbAnalyser::muonSelection()
@@ -127,23 +153,43 @@ bool MssmHbbAnalyser::muonJet(const bool & swap)
    ++ cutflow_;
    if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
    {
-      if ( swap ) h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,"MSSMHbb Semileptonic: Jet-muon association -> Muon-Jet index 1");
-      else        h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,"MSSMHbb Semileptonic: Jet-muon association");
+      std::string label = Form("MSSMHbb: Jet-muon association (delta_R < %4.2f)", config_->jetsMuonsDRMax());;
+      std::string label_swap = Form("%s | Muon-Jet index 1 (swap)", label.c_str());;
+      if ( swap ) h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label_swap.c_str());
+      else        h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
    }
    
    if ( selectedJets_.size() < 2 ||  selectedMuons_.size() < 1 ) return false;
    
    auto jet1 = selectedJets_[j1];
-   jet1 -> addMuon(selectedMuons_);
+   jet1 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
    auto jet2 = selectedJets_[j2];
-   jet2 -> addMuon(selectedMuons_);
+   jet2 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
+
+   // Only muons within those 2 jets are kept
+   std::vector< std::shared_ptr<Muon> > sel_muons;
+   sel_muons.clear();
+   for ( auto & sm : selectedMuons_ )
+   {
+      if ( sm == jet1->muon() || sm == jet2->muon() )
+         sel_muons.push_back(sm);
+   }
+   selectedMuons_ = sel_muons;
    
-   if ( ! (jet1 -> muon() || jet2 -> muon()) ) return false;
+      
+   if ( selectedMuons_.size() == 0 ) return false;
    if ( !  jet1 -> muon() && swap ) this->jetSwap(r1,r2);
    
    h1_["cutflow"] -> Fill(cutflow_,weight_);
    return true;
    
+}
+
+bool MssmHbbAnalyser::onlineMuonMatching()
+{
+   if ( ! MuonAnalyser::onlineMuonMatching() ) return false;
+   return true;
+      
 }
 
 void MssmHbbAnalyser::fillMssmHbbTree()
@@ -206,7 +252,7 @@ void MssmHbbAnalyser::fillMssmHbbHistograms(const std::string & label)
          float mxy = 0.;
          Composite<Jet,Jet> c_xy(*(jet_j1),*(jet_j2));
          if ( config_->isMC() || !config_->signalRegion() ) mxy = c_xy.m();
-         name  = Form("m_jets%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+         name  = Form("m_jet%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
          h1_[pname] -> Fill(mxy,weight_);
          
       } 
@@ -245,7 +291,7 @@ void MssmHbbAnalyser::mssmHbbHistograms(const std::string & label)
       for ( int r2 = r+1 ; r2 <= njets ; ++r2 )
       {
          if ( r2 == r ) continue;
-         name  = Form("m_jets%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
+         name  = Form("m_jet%d%d",r,r2);  pname = Form("%s%s",prefix.c_str(),name.c_str());
          h1_[pname] = std::make_shared<TH1F>(name.c_str(),name.c_str(), 3000,0,3000);
          
       } 
