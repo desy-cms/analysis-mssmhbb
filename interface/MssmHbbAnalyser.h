@@ -43,7 +43,8 @@ namespace analysis {
            ~MssmHbbAnalyser();
            
             virtual bool event(const int &i);
-            virtual bool muonJet(const bool & swap = false);
+//            virtual bool muonJet(const bool & swap = false);
+            virtual bool muonJet();
             virtual bool onlineMuonMatching();
             void fillMssmHbbTree();
             void mssmHbbTree();
@@ -52,6 +53,7 @@ namespace analysis {
             bool triggerSelection();
             bool jetSelection();
             bool muonSelection();
+            bool muonJetSelection();
             bool btagSelection();
             bool endSelection();
             // ----------member data ---------------------------
