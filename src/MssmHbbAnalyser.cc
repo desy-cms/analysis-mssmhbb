@@ -13,6 +13,8 @@
 
 // system include files
 #include <iostream>
+
+#include "TString.h"
 // 
 // user include files
 #include "Analysis/MssmHbb/interface/MssmHbbAnalyser.h"
@@ -66,7 +68,7 @@ bool MssmHbbAnalyser::event(const int & i)
    return true;
 }bool MssmHbbAnalyser::triggerSelection()
 {
-   return ( this->selectionL1() && this->selectionHLT() );
+   return ( this->selectionHLT() && this->selectionL1() );
 }
 
 bool MssmHbbAnalyser::jetSelection()
@@ -106,8 +108,24 @@ bool MssmHbbAnalyser::btagSelection()
    }
    else
    {
-      this->actionApplyBtagEfficiency(1,1);
-      this->actionApplyBtagEfficiency(2,1);
+      if ( ! muonsanalysis_ || config_->muonsVeto() )
+      {
+         this->actionApplyBtagEfficiency(1,1);
+         this->actionApplyBtagEfficiency(2,1);
+      }
+      else
+      {
+         if ( selectedJets_[0]->muon() )
+         {
+            this->actionApplyBtagEfficiency(1,3);
+            this->actionApplyBtagEfficiency(2,1);
+         }
+         else
+         {
+            this->actionApplyBtagEfficiency(1,1);
+            this->actionApplyBtagEfficiency(2,3);
+         }
+      }
       if ( config_->signalRegion() )
       {
          this->actionApplyBtagEfficiency(3,2);
@@ -138,12 +156,70 @@ bool MssmHbbAnalyser::endSelection()
       
 }
 
-bool MssmHbbAnalyser::muonJet(const bool & swap)
+// bool MssmHbbAnalyser::muonJet(const bool & swap)
+// {
+//    // jet 1 is the muon jet, swap with jet 2 in case jet1 does not have a muon 
+//    // Muon jet association, a muon can be in either of the two leading jets.
+//    // If argument is false(default, the jet label follows the jet ranking, regardless of where the muon is
+//    // If argument is true, the jet label 1 refers to the muon-jet: *** the order of the workflow may matter!!! ***
+//    if ( ! muonsanalysis_ || ! jetsanalysis_ ) return true;  // will skip this selection
+//    
+//    int r1 = 1;
+//    int r2 = 2;
+//    int j1 = r1-1;
+//    int j2 = r2-1;
+//    ++ cutflow_;
+//    if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
+//    {
+//       std::string label = Form("MSSMHbb: Jet-muon association (delta_R < %4.2f)", config_->jetsMuonsDRMax());;
+//       std::string label_swap = Form("%s | Muon-Jet index 1 (swap)", label.c_str());;
+//       if ( swap ) h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label_swap.c_str());
+//       else        h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
+//    }
+//    
+//    if ( selectedJets_.size() < 2 ||  selectedMuons_.size() < 1 ) return false;
+//    
+//    auto jet1 = selectedJets_[j1];
+//    jet1 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
+//    auto jet2 = selectedJets_[j2];
+//    jet2 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
+// 
+//    // Only muons within those 2 jets are kept
+//    std::vector< std::shared_ptr<Muon> > sel_muons;
+//    sel_muons.clear();
+//    for ( auto & sm : selectedMuons_ )
+//    {
+//       if ( sm == jet1->muon() || sm == jet2->muon() )
+//          sel_muons.push_back(sm);
+//    }
+//    selectedMuons_ = sel_muons;
+//    
+//       
+//    if ( selectedMuons_.size() == 0 ) return false;
+//    if ( !  jet1 -> muon() && swap ) this->jetSwap(r1,r2);
+//    
+//    h1_["cutflow"] -> Fill(cutflow_,weight_);
+//    return true;
+//    
+// }
+// 
+
+bool MssmHbbAnalyser::muonJetSelection()
 {
-   // jet 1 is the muon jet, swap with jet 2 in case jet1 does not have a muon 
-   // Muon jet association, a muon can be in either of the two leading jets.
-   // If argument is false(default, the jet label follows the jet ranking, regardless of where the muon is
-   // If argument is true, the jet label 1 refers to the muon-jet: *** the order of the workflow may matter!!! ***
+   if ( ! this->muonJet() ) return false; // find muon jet
+   for ( int r = 1; r<=2 ; ++r )
+   {
+      // this->applyMuonSF(selectedJets_[r-1]->muon()); // apply muon SF
+   }
+   return true;
+}
+bool MssmHbbAnalyser::muonJet()
+{
+   // muon jet is either of the two leading jets
+   // if both jets have muons, the one with the largest muon pt is the muon jet
+   // selectedMuons will hold only the muon of the muon jet
+   // only the selected muon jet will hold a muon
+   
    if ( ! muonsanalysis_ || ! jetsanalysis_ ) return true;  // will skip this selection
    
    int r1 = 1;
@@ -154,36 +230,57 @@ bool MssmHbbAnalyser::muonJet(const bool & swap)
    if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
    {
       std::string label = Form("MSSMHbb: Jet-muon association (delta_R < %4.2f)", config_->jetsMuonsDRMax());;
-      std::string label_swap = Form("%s | Muon-Jet index 1 (swap)", label.c_str());;
-      if ( swap ) h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label_swap.c_str());
-      else        h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
+      h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
    }
    
    if ( selectedJets_.size() < 2 ||  selectedMuons_.size() < 1 ) return false;
+
+   // Only one muon is kept
+   std::vector< std::shared_ptr<Muon> > sel_muons;
+   sel_muons.clear();
    
    auto jet1 = selectedJets_[j1];
    jet1 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
    auto jet2 = selectedJets_[j2];
    jet2 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
-
-   // Only muons within those 2 jets are kept
-   std::vector< std::shared_ptr<Muon> > sel_muons;
-   sel_muons.clear();
-   for ( auto & sm : selectedMuons_ )
+   
+   if ( ! ( jet1->muon() || jet2->muon() ) ) return false;
+   
+   // if both jets have a muon, the SL jet is the one with highest leading muon
+   if ( jet1->muon() && jet2->muon() )
    {
-      if ( sm == jet1->muon() || sm == jet2->muon() )
-         sel_muons.push_back(sm);
+      if ( jet1->muon()->pt() > jet2->muon()->pt() )
+      {
+         jet2->removeMuon();
+         sel_muons.push_back(jet1->muon());
+      }
+      else
+      {
+         jet1->removeMuon();
+         sel_muons.push_back(jet2->muon());
+      }
+   }
+   else  // either jet1 or jet2 has muon
+   {
+      if ( jet1->muon() )
+      {
+         jet2->removeMuon();
+         sel_muons.push_back(jet1->muon());
+      }
+      if ( jet2->muon() )
+      {
+         jet1->removeMuon();
+         sel_muons.push_back(jet2->muon());
+      }
    }
    selectedMuons_ = sel_muons;
-   
-      
-   if ( selectedMuons_.size() == 0 ) return false;
-   if ( !  jet1 -> muon() && swap ) this->jetSwap(r1,r2);
    
    h1_["cutflow"] -> Fill(cutflow_,weight_);
    return true;
    
 }
+
+
 
 bool MssmHbbAnalyser::onlineMuonMatching()
 {
