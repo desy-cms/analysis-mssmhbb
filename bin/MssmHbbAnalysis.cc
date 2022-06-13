@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
         if ( ! mssmhbb.jetCorrections()     )  continue;    // jet corrections
         if ( ! mssmhbb.muonSelection()      )  continue;    // muon
         if ( ! mssmhbb.jetSelection()       )  continue;    // jets
-        if ( ! mssmhbb.muonJet()            )  continue;    // muon-jet association
+        if ( ! mssmhbb.muonJetSelection()   )  continue;    // muon-jet association
         if ( ! mssmhbb.btagSelection()      )  continue;    // btagging
         mssmhbb.endSelection();
     }
