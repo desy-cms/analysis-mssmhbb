@@ -220,7 +220,7 @@ bool MssmHbbAnalyser::muonJet()
    // selectedMuons will hold only the muon of the muon jet
    // only the selected muon jet will hold a muon
    
-   if ( ! muonsanalysis_ || ! jetsanalysis_ ) return true;  // will skip this selection
+   if ( ! muonsanalysis_ || ! jetsanalysis_ || config_->muonsVeto()) return true;  // will skip this selection
    
    int r1 = 1;
    int r2 = 2;
@@ -399,8 +399,7 @@ void MssmHbbAnalyser::mssmHbbHistograms(const std::string & label)
 }
 bool MssmHbbAnalyser::muonVeto()
 {
-   bool veto = false;
-   if ( ! config_->muonsVeto() ) return veto;
+   if ( ! config_->muonsVeto() ) return false;
    ++ cutflow_;
    if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
    {
@@ -408,18 +407,29 @@ bool MssmHbbAnalyser::muonVeto()
       h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
    }
    
-   if ( selectedJets_.size() < 2 ||  selectedMuons_.size() < 1 ) return veto;
-
    auto jet1 = selectedJets_[0];
    jet1 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
    auto jet2 = selectedJets_[1];
    jet2 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
 
    // Only veto if the leading selected muon is in either of the jets   
-   if ( jet1->muon() == selectedMuons_[0] || jet2->muon() == selectedMuons_[0] ) veto = true;
+   if ( jet1->muon() == selectedMuons_[0] || jet2->muon() == selectedMuons_[0] ) return true;
    
    h1_["cutflow"] -> Fill(cutflow_,weight_);
    
-   return veto;
+   return false;
    
+}
+bool MssmHbbAnalyser::jetSelector()
+{
+   if ( ! this->selectionJetId()          )   return false;
+   if ( ! this->selectionJetPileupId()    )   return false;
+   return true;
+
+}
+bool MssmHbbAnalyser::muonSelector()
+{
+   if ( ! this->selectionMuonId()         )   return false;
+   return true;
+
 }
