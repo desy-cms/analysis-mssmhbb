@@ -397,3 +397,29 @@ void MssmHbbAnalyser::mssmHbbHistograms(const std::string & label)
    h1_[pname] = std::make_shared<TH1F>(name.c_str(),"MSSM Hbb mbb (deprecated?)", 3000,0,3000);
    
 }
+bool MssmHbbAnalyser::muonVeto()
+{
+   bool veto = false;
+   if ( ! config_->muonsVeto() ) return veto;
+   ++ cutflow_;
+   if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
+   {
+      std::string label = Form("MSSMHbb Muon Veto: Jet-muon association (delta_R < %4.2f)", config_->jetsMuonsDRMax());;
+      h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
+   }
+   
+   if ( selectedJets_.size() < 2 ||  selectedMuons_.size() < 1 ) return veto;
+
+   auto jet1 = selectedJets_[0];
+   jet1 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
+   auto jet2 = selectedJets_[1];
+   jet2 -> addMuon(selectedMuons_,config_->jetsMuonsDRMax());
+
+   // Only veto if the leading selected muon is in either of the jets   
+   if ( jet1->muon() == selectedMuons_[0] || jet2->muon() == selectedMuons_[0] ) veto = true;
+   
+   h1_["cutflow"] -> Fill(cutflow_,weight_);
+   
+   return veto;
+   
+}

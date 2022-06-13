@@ -55,6 +55,7 @@ namespace analysis {
             bool muonSelection();
             bool muonJetSelection();
             bool btagSelection();
+            bool muonVeto();
             bool endSelection();
             // ----------member data ---------------------------
          protected:
