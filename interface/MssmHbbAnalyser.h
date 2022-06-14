@@ -43,14 +43,21 @@ namespace analysis {
            ~MssmHbbAnalyser();
            
             virtual bool event(const int &i);
-            virtual bool muonJet(const bool & swap = false);
+//            virtual bool muonJet(const bool & swap = false);
+            virtual bool muonJet();
+            virtual bool onlineMuonMatching();
             void fillMssmHbbTree();
             void mssmHbbTree();
             void mssmHbbHistograms(const std::string & label="");
             void fillMssmHbbHistograms(const std::string & label="");
+            bool triggerSelection();
+            bool jetSelector();
             bool jetSelection();
+            bool muonSelector();
             bool muonSelection();
+            bool muonJetSelection();
             bool btagSelection();
+            bool muonVeto();
             bool endSelection();
             // ----------member data ---------------------------
          protected:

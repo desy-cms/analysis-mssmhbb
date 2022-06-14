@@ -13,14 +13,15 @@ int main(int argc, char ** argv)
     for ( int i = 0 ; i < mssmhbb.nEvents() ; ++i )
     {
         if ( ! mssmhbb.event(i)             )  continue;    // read event, run selection/json
-        if ( ! mssmhbb.selectionL1 ()       )  continue;    // trigger
-        if ( ! mssmhbb.selectionHLT ()      )  continue;    // trigger
-        if ( ! mssmhbb.preselection()       )  continue;    // preselection
+        if ( ! mssmhbb.triggerSelection()   )  continue;    // trigger
+        if ( ! mssmhbb.jetSelector()        )  continue;    // jet selector (remove fake jets)
         if ( ! mssmhbb.jetCorrections()     )  continue;    // jet corrections
-        if ( ! mssmhbb.muonSelection()      )  continue;    // muon
         if ( ! mssmhbb.jetSelection()       )  continue;    // jets
-        if ( ! mssmhbb.muonJet()            )  continue;    // muon-jet association
+        if ( ! mssmhbb.muonSelector()       )  continue;    // muon selector (remove fake muons)
+        if ( ! mssmhbb.muonSelection()      )  continue;    // muon selection
+        if ( ! mssmhbb.muonJetSelection()   )  continue;    // muon-jet association
         if ( ! mssmhbb.btagSelection()      )  continue;    // btagging
+        if (   mssmhbb.muonVeto()           )  continue;    // muon veto (for full hadronic)
         mssmhbb.endSelection();
     }
 } // end main
