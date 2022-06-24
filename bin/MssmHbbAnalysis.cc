@@ -9,6 +9,13 @@ int main(int argc, char ** argv)
     TH1::SetDefaultSumw2();  // proper treatment of errors when scaling histograms
 
     MssmHbbAnalyser mssmhbb(argc,argv);
+    
+    auto config = mssmhbb.config();
+    if ( config -> muonsVeto() )
+    {
+       mssmhbb.jetHistograms(config->nJetsMin(),"final_noveto");
+       mssmhbb.jetHistograms(config->nJetsMin(),"final_muon_veto");
+    }
 
     for ( int i = 0 ; i < mssmhbb.nEvents() ; ++i )
     {
@@ -21,7 +28,9 @@ int main(int argc, char ** argv)
         if ( ! mssmhbb.muonSelection()      )  continue;    // muon selection
         if ( ! mssmhbb.muonJetSelection()   )  continue;    // muon-jet association
         if ( ! mssmhbb.btagSelection()      )  continue;    // btagging
+        if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_noveto");
         if (   mssmhbb.muonVeto()           )  continue;    // muon veto (for full hadronic)
+        if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_muon_veto");
         mssmhbb.endSelection();
     }
 } // end main
