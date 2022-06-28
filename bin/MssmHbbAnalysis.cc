@@ -31,6 +31,7 @@ int main(int argc, char ** argv)
         if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_noveto");
         if (   mssmhbb.muonVeto()           )  continue;    // muon veto (for full hadronic)
         if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_muon_veto");
+        mssmhbb.actionApplyPrefiringWeight();
         mssmhbb.endSelection();
     }
 } // end main
