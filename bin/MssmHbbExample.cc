@@ -15,7 +15,10 @@ int main(int argc, char ** argv)
 
     mssmhbb.jetHistograms(config->nJetsMin(),"kinematics");
     mssmhbb.jetHistograms(config->nJetsMin(),"btagging");
-    mssmhbb.jetHistograms(config->nJetsMin(),"trigger_matching");
+    mssmhbb.jetHistograms(config->nJetsMin(),"jet_matching");
+    mssmhbb.jetHistograms(config->nJetsMin(),"bjet_matching");
+    mssmhbb.add1DHistogram("jet_matching","matched_ranks","matched ranks",10,0,10);
+    
     
     if ( wf == 1 )
     {
@@ -40,9 +43,16 @@ int main(int argc, char ** argv)
             mssmhbb.fillJetHistograms("btagging");
             if ( ! mssmhbb.onlineJetMatching(1)   )  continue;   // jet trg matching
             if ( ! mssmhbb.onlineJetMatching(2)   )  continue;   // jet trg matching
+            mssmhbb.fillJetHistograms("jet_matching");
+            auto bmatched = mssmhbb.onlineBJetMatching({1,2,3});
+            if ( bmatched.size() > 1 )
+            {
+                if ( bmatched[0] == 1 && bmatched[1] == 2 ) mssmhbb.fill1DHistogram("jet_matching","matched_ranks",0.,mssmhbb.weight());
+                if ( bmatched[0] == 1 && bmatched[1] == 3 ) mssmhbb.fill1DHistogram("jet_matching","matched_ranks",1.,mssmhbb.weight());
+                if ( bmatched[0] == 2 && bmatched[1] == 3 ) mssmhbb.fill1DHistogram("jet_matching","matched_ranks",2.,mssmhbb.weight());
+            }
             if ( ! mssmhbb.onlineBJetMatching({1,2,3},2)  )  continue;   // bjet trg matching
-            
-            mssmhbb.fillJetHistograms("trigger_matching");
+            mssmhbb.fillJetHistograms("bjet_matching");
             mssmhbb.endSelection();
         } // end loop workflow 1
     }
@@ -73,10 +83,12 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.onlineBJetMatching(1)  )  continue;   // bjet trg matching
             if ( ! mssmhbb.onlineBJetMatching(2)  )  continue;   // bjet trg matching
             
-            mssmhbb.fillJetHistograms("trigger_matching");
+            mssmhbb.fillJetHistograms("bjet_matching");
             mssmhbb.endSelection();
         } // end loop workflow 2
     } // end workflow 2
+
+
 
 } 
 
