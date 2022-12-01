@@ -433,3 +433,14 @@ bool MssmHbbAnalyser::muonSelector()
    return true;
 
 }
+
+void MssmHbbAnalyser::sortedBTagScorePlus3Jets()
+{
+   std::string label = "*** Sorting +3 jets in descending btag score";
+   auto two_leading_jets = this->keepSelectedJets({1,2});
+   auto plus3_leading_jets = this->removeSelectedJets({1,2});
+   auto btag_sorted_jets = this->btagSortedJets(plus3_leading_jets);
+   auto new_selectedJets = this->concatenateJets(two_leading_jets,btag_sorted_jets);
+   this->selectedJets(new_selectedJets);
+   cutflow(label);
+}

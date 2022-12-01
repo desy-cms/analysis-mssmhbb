@@ -1,0 +1,1 @@
+/pnfs/desy.de/cms/tier2/store/user/daleyvap/Analysis/Ntuples/MC/Run2017-v6/ntuplizer_106X_run2legacy/SUSYGluGluToBBHToBB_M-1000_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9_ext1-v1/220110_143807/0000/ntuple_41.root
