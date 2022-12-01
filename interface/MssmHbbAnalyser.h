@@ -59,6 +59,7 @@ namespace analysis {
             bool btagSelection();
             bool muonVeto();
             bool endSelection();
+            void sortedBTagScorePlus3Jets();
             // ----------member data ---------------------------
          protected:
             bool do_tree_;
