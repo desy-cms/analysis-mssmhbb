@@ -431,7 +431,6 @@ bool MssmHbbAnalyser::muonSelector()
 {
    if ( ! this->selectionMuonId()         )   return false;
    return true;
-
 }
 
 void MssmHbbAnalyser::sortedBTagScorePlus3Jets()
@@ -444,3 +443,17 @@ void MssmHbbAnalyser::sortedBTagScorePlus3Jets()
    this->selectedJets(new_selectedJets); // modified selectedJets_
    cutflow(label);
 }
+
+std::vector< std::shared_ptr<Jet> > MssmHbbAnalyser::mainJets()
+{
+   auto main_jets = this->keepSelectedJets({1,2,3}); // vector containing jets 1 and 2
+   return main_jets;
+}
+
+std::vector< std::shared_ptr<Jet> > MssmHbbAnalyser::fsrCandidates()
+{
+   auto fsr_jets = this->removeSelectedJets({1,2,3}); // vector containing only jets with rank 4 and higher
+   auto sorted_fsr_jets = this->ptSortedJets(fsr_jets); // vector containing fsr candidates sorted by descending pt 
+   return sorted_fsr_jets;
+}
+
