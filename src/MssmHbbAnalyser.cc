@@ -93,6 +93,58 @@ bool MssmHbbAnalyser::jetSelection()
       return true;
       
 }
+
+void MssmHbbAnalyser::btagEfficiencyWeight()
+{
+   if ( config_->btagEfficiencies(1) == "" ) return ;  // will do nothing
+
+   std::vector<int> ranks = {1,2,3};
+   std::vector<int> bmatched_ranks; // the 2 online bjets
+   int non_bmatched_rank; // the not online bjet
+   // ! matched online btags - only look for matched jets, no filtering
+   auto online_btags = this->onlineBJetMatching(ranks);
+   // 3 leading jets
+   auto three_leading_jets = this->keepSelectedJets(ranks);
+   // sorted by btag score - only the 2 jets with highest offline btag will be considered matched to online
+   auto btag_sorted_jets = this->btagSortedJets(three_leading_jets);
+   // find the ranks of the 2 jets with highest offline btag
+   for ( size_t i = 0; i < 2; ++i )
+      for ( size_t j = 0; j < online_btags.size(); ++j )
+         if ( btag_sorted_jets[i] == three_leading_jets[j] ) bmatched_ranks.push_back(j+1);
+   // find the non matched jet
+   std::sort(bmatched_ranks.begin(), bmatched_ranks.end()); // sort the ranks - easier to distinguish the daughters to the b associated
+   bool notfound = false;
+   for ( auto & r : ranks )
+   {
+      for ( auto & br : bmatched_ranks )
+         if (r == br) notfound = true;
+      if ( ! notfound ) non_bmatched_rank = r;
+      notfound = false;
+   }
+   // TODO need to implement something for the semileptonic like in btagSelection() below.
+
+   // Full hadronic for the time being
+   // Efficiencies 1: FH with trigger
+   // Efficiencies 2: FH without trigger
+
+   if (bmatched_ranks[1] != 3) // matched are jets 1 and 2
+   {
+      for ( auto & br : bmatched_ranks )
+         this->actionApplyBtagEfficiency(br,1);
+      if ( config_->signalRegion() ) this->actionApplyBtagEfficiency(3,2);
+   }
+   else // matched jets (1 or 2) and 3
+   {
+      this->actionApplyBtagEfficiency(bmatched_ranks[0],1);
+      this->actionApplyBtagEfficiency(non_bmatched_rank,2);
+      if ( config_->signalRegion() ) this->actionApplyBtagEfficiency(3,1);
+
+   }
+
+   std::string label = "*** btag weight ***";
+   cutflow(label);
+}
+
 bool MssmHbbAnalyser::btagSelection()
 {
    if ( ! this->onlineBJetMatching(1)    )   return false;
