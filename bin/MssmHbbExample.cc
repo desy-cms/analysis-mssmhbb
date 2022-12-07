@@ -144,6 +144,38 @@ int main(int argc, char ** argv)
             mssmhbb.endSelection();
         } // end loop workflow 4
     }
+    if ( wf == 5 )
+    {
+       for ( int i = 0 ; i < mssmhbb.nEvents() ; ++i )
+        {
+            if ( ! mssmhbb.event(i)                       )  continue;    // read event, run selection/json
+            if ( ! mssmhbb.triggerSelection()             )  continue;
+            if ( ! mssmhbb.selectionPrimaryVertex()       )  continue;
+            if ( ! mssmhbb.selectionJetId()               )  continue;
+            if ( ! mssmhbb.selectionJetPileupId()         )  continue;
+            if ( ! mssmhbb.selectionNJets()               )  continue;
+            if ( ! mssmhbb.jetCorrections()               )  continue;    // jet corrections
+            if ( ! mssmhbb.selectionJet(1)                )  continue;    // jet selection
+            if ( ! mssmhbb.selectionJet(2)                )  continue;    // jet selection
+            if ( ! mssmhbb.selectionJetDr(1,2)            )  continue;    // jet deltaR selection
+            if ( ! mssmhbb.selectionJetDeta(1,2)          )  continue;    // jet deltaEta selection
+            if ( ! mssmhbb.onlineJetMatching(1)           )  continue;   // jet trg matching
+            if ( ! mssmhbb.onlineJetMatching(2)           )  continue;   // jet trg matching
+            mssmhbb.fillJetHistograms("kinematics");      
+            if ( ! mssmhbb.selectionBJet(1)               )  continue;   mssmhbb.actionApplyBtagSF(1);  // btag selection
+            if ( ! mssmhbb.selectionBJet(2)               )  continue;   mssmhbb.actionApplyBtagSF(2);  // btag selection
+            mssmhbb.sortedBTagScorePlus3Jets();
+            if ( ! mssmhbb.onlineBJetMatching({1,2,3},2)  )  continue;   // bjet trg matching (more inclusive)
+            mssmhbb.fsrCorrections(mssmhbb.mainJets(),mssmhbb.fsrCandidates());
+            if ( ! mssmhbb.selectionJet(3)                )  continue;    // jet selection
+            if ( ! mssmhbb.selectionJetDr(1,3)            )  continue;    // jet deltaR selection
+            if ( ! mssmhbb.selectionJetDr(2,3)            )  continue;    // jet deltaR selection
+            if ( ! mssmhbb.selectionBJet(3)               )  continue;   mssmhbb.actionApplyBtagSF(3); // btag selection
+            mssmhbb.fillJetHistograms("btagging");
+            if ( ! mssmhbb.selectionDiJetMass(1,2)        ) continue;
+            mssmhbb.endSelection();
+        } // end loop workflow 5
+    }
 } 
 
 // end main
