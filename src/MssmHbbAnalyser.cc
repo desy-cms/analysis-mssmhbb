@@ -210,10 +210,10 @@ bool MssmHbbAnalyser::endSelection()
 bool MssmHbbAnalyser::muonJetSelection()
 {
    if ( ! this->muonJet() ) return false; // find muon jet
-   for ( int r = 1; r<=2 ; ++r )
+   /*for ( int r = 1; r<=2 ; ++r )
    {
       // this->applyMuonSF(selectedJets_[r-1]->muon()); // apply muon SF
-   }
+   }*/
    
    return true;
 }
