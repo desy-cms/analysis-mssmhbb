@@ -58,6 +58,7 @@ namespace analysis {
             bool muonSelection();
             bool muonJetSelection();
             bool btagSelection();
+            void btagEfficiencyWeight();
             bool muonVeto();
             bool endSelection();
             void sortedBTagScorePlus3Jets();

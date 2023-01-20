@@ -93,10 +93,65 @@ bool MssmHbbAnalyser::jetSelection()
       return true;
       
 }
+
+
+void MssmHbbAnalyser::btagEfficiencyWeight()
+{
+   if ( config_->btagEfficiencies(1) == "" ) return ;  // will do nothing
+
+   std::vector<int> ranks = {1,2,3};
+   auto online_btags = this->onlineBJetMatching(ranks);
+   std::sort(online_btags.begin(), online_btags.end());
+   // Full hadronic for the time being
+   // Efficiencies 1: FH with trigger
+   // Efficiencies 2: FH without trigger
+
+   // TODO: find a better algorithm
+   if (online_btags.size() == 3) // matched 1,2,3
+   {
+      for ( auto & r : ranks )
+         this->actionApplyBtagEfficiency(r,1);
+   }
+   if (online_btags.size() == 2)
+   {
+      if (online_btags[1] != 3)  // matched 1,2
+      {
+         this->actionApplyBtagEfficiency(1,1);
+         this->actionApplyBtagEfficiency(2,1);
+         this->actionApplyBtagEfficiency(3,2);
+      }
+      else
+      {
+         if (online_btags[0] != 1)  // matched 2,3
+         {
+            this->actionApplyBtagEfficiency(1,2);
+            this->actionApplyBtagEfficiency(2,1);
+            this->actionApplyBtagEfficiency(3,1);
+         }
+         else // matched 1,3
+         {
+            this->actionApplyBtagEfficiency(1,1);
+            this->actionApplyBtagEfficiency(2,2);
+            this->actionApplyBtagEfficiency(3,1);
+
+         }
+
+      }
+   }
+
+   std::string label = "*** btag weight ***";
+   cutflow(label);
+}
+
+
+
 bool MssmHbbAnalyser::btagSelection()
 {
-   if ( ! this->onlineBJetMatching(1)    )   return false;
-   if ( ! this->onlineBJetMatching(2)    )   return false;
+   //if ( ! this->onlineBJetMatching(1)    )   return false;
+   //if ( ! this->onlineBJetMatching(2)    )   return false;
+
+   if ( ! this->onlineBJetMatching({1,2,3},2)  )  return false;   // bjet trg matching (more inclusive)
+   
    if ( config_->btagEfficiencies(1) == "" )
    {
       if ( ! this->selectionBJet(1)      )   return false;
@@ -207,12 +262,10 @@ bool MssmHbbAnalyser::endSelection()
 bool MssmHbbAnalyser::muonJetSelection()
 {
    if ( ! this->muonJet() ) return false; // find muon jet
-   for ( int r = 1; r<=2 ; ++r )
-   {
-      // this->applyMuonSF(selectedJets_[r-1]->muon()); // apply muon SF
-   }
+   
    return true;
 }
+
 bool MssmHbbAnalyser::muonJet()
 {
    // muon jet is either of the two leading jets
