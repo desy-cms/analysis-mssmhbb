@@ -496,13 +496,15 @@ void MssmHbbAnalyser::sortedBTagScorePlus3Jets()
    cutflow(label);
 }
 
+// TODO: remove hard-coded list of jets, pass the main jets list
 std::vector< std::shared_ptr<Jet> > MssmHbbAnalyser::mainJets()
 {
    auto main_jets = this->keepSelectedJets({1,2,3}); // vector containing jets 1 and 2
    return main_jets;
 }
 
-std::vector< std::shared_ptr<Jet> > MssmHbbAnalyser::fsrCandidates()
+// TODO: remove hard-coded list of jets, pass the main jets list
+std::vector<std::shared_ptr<Jet>> MssmHbbAnalyser::fsrCandidates()
 {
    auto fsr_jets = this->removeSelectedJets({1,2,3}); // vector containing only jets with rank 4 and higher
    auto sorted_fsr_jets = this->ptSortedJets(fsr_jets); // vector containing fsr candidates sorted by descending pt 
