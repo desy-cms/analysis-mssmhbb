@@ -22,11 +22,15 @@ int main(int argc, char ** argv)
         if ( ! mssmhbb.event(i)             )  continue;    // read event, run selection/json
         if ( ! mssmhbb.triggerSelection()   )  continue;    // trigger
         if ( ! mssmhbb.jetSelector()        )  continue;    // jet selector (remove fake jets)
+        mssmhbb.HEMCorrection();    // HEM modules correction
+        if ( ! mssmhbb.selectionPrimaryVertex()       )  continue;  // PV selection
         if ( ! mssmhbb.jetCorrections()     )  continue;    // jet corrections
+        mssmhbb.fsrCorrections(mssmhbb.mainJets(),mssmhbb.fsrCandidates());
         if ( ! mssmhbb.jetSelection()       )  continue;    // jets
         if ( ! mssmhbb.muonSelector()       )  continue;    // muon selector (remove fake muons)
         if ( ! mssmhbb.muonSelection()      )  continue;    // muon selection
         if ( ! mssmhbb.muonJetSelection()   )  continue;    // muon-jet association
+        if ( ! mssmhbb.muonCorrections()    )  continue;    // muon corrections
         if ( ! mssmhbb.btagSelection()      )  continue;    // btagging
         if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_noveto");
         if (   mssmhbb.muonVeto()           )  continue;    // muon veto (for full hadronic)

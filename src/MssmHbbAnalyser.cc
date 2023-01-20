@@ -147,8 +147,11 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
 
 bool MssmHbbAnalyser::btagSelection()
 {
-   if ( ! this->onlineBJetMatching(1)    )   return false;
-   if ( ! this->onlineBJetMatching(2)    )   return false;
+   //if ( ! this->onlineBJetMatching(1)    )   return false;
+   //if ( ! this->onlineBJetMatching(2)    )   return false;
+
+   if ( ! this->onlineBJetMatching({1,2,3},2)  )  return false;   // bjet trg matching (more inclusive)
+   
    if ( config_->btagEfficiencies(1) == "" )
    {
       if ( ! this->selectionBJet(1)      )   return false;
@@ -259,12 +262,10 @@ bool MssmHbbAnalyser::endSelection()
 bool MssmHbbAnalyser::muonJetSelection()
 {
    if ( ! this->muonJet() ) return false; // find muon jet
-   for ( int r = 1; r<=2 ; ++r )
-   {
-      // this->applyMuonSF(selectedJets_[r-1]->muon()); // apply muon SF
-   }
+   
    return true;
 }
+
 bool MssmHbbAnalyser::muonJet()
 {
    // muon jet is either of the two leading jets
