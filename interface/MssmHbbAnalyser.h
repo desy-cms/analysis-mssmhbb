@@ -61,7 +61,6 @@ namespace analysis {
             bool muonVeto();
             bool endSelection();
             void sortedBTagScorePlus3Jets();
-            void HEMCorrection();
             std::vector< std::shared_ptr<analysis::tools::Jet> > mainJets();
             std::vector< std::shared_ptr<analysis::tools::Jet> > fsrCandidates();
             // ----------member data ---------------------------
