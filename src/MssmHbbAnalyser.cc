@@ -416,21 +416,31 @@ void MssmHbbAnalyser::mssmHbbHistograms(const std::string & label)
 bool MssmHbbAnalyser::muonVeto()
 {
    if ( ! config_->muonsVeto() ) return false;
+   if ( ! muonsanalysis_ && config_->muonsVetoTrigger() == "" ) // neither offline muons veto not muon trigger veto- nothing to be done
+      return false;
+
    ++ cutflow_;
    if ( std::string(h1_["cutflow"] -> GetXaxis()-> GetBinLabel(cutflow_+1)) == "" ) 
    {
-      std::string label = Form("MSSMHbb Muon Veto: Jet-muon association (delta_R < %4.2f)", config_->jetsMuonsDRMax());;
+      std::string label = "MSSMHbb Muon Veto: Jet-muon association";
+      if ( config_->muonsVetoTrigger() != "") // overrides offline muon veto
+         label = Form("MSSMHbb Muon Veto: Trigger %s)", config_->muonsVetoTrigger().c_str());
       h1_["cutflow"] -> GetXaxis()-> SetBinLabel(cutflow_+1,label.c_str());
    }
-   
-   auto jet1 = selectedJets_[0];
-   auto jet2 = selectedJets_[1];
-
-   // Only veto if the leading selected muon is in either of the jets
-   // jet-muon association done by muonJet() function
-   if (jet1->muon() || jet2->muon())
-      return true;
-
+   if ( config_->muonsVetoTrigger() == "" )   
+   {
+      auto jet1 = selectedJets_[0];
+      auto jet2 = selectedJets_[1];
+      // Only veto if the leading selected muon is in either of the jets
+      // jet-muon association done by muonJet() function
+      if (jet1->muon() || jet2->muon())
+         return true;
+   }
+   else
+   {    
+      if ( analysis_->triggerResult(config_->muonsVetoTrigger()) )
+         return true;
+   }
    h1_["cutflow"] -> Fill(cutflow_,weight_);
    
    return false;
