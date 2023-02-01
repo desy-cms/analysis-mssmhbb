@@ -100,7 +100,7 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
    if ( config_->btagEfficiencies(1) == "" ) return ;  // will do nothing
 
    std::vector<int> ranks = {1,2,3};
-   auto online_btags = this->onlineBJetMatching(ranks);
+   auto online_btags = this->onlineBJetMatching(ranks); // returns matched jets
    std::sort(online_btags.begin(), online_btags.end());
    // Full hadronic for the time being
    // Efficiencies 1: FH with trigger
@@ -110,7 +110,10 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
    if (online_btags.size() == 3) // matched 1,2,3
    {
       for ( auto & r : ranks )
-         this->actionApplyBtagEfficiency(r,1);
+         {
+            if ( ! config_-> signalRegion() && r == 3 ) continue; // do nothing in CR for jet3
+            this->actionApplyBtagEfficiency(r,1);
+         }
    }
    if (online_btags.size() == 2)
    {
@@ -118,7 +121,8 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
       {
          this->actionApplyBtagEfficiency(1,1);
          this->actionApplyBtagEfficiency(2,1);
-         this->actionApplyBtagEfficiency(3,2);
+         if (config_->signalRegion()) // do nothing in CR for jet3
+            this->actionApplyBtagEfficiency(3,2);
       }
       else
       {
@@ -126,13 +130,15 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
          {
             this->actionApplyBtagEfficiency(1,2);
             this->actionApplyBtagEfficiency(2,1);
-            this->actionApplyBtagEfficiency(3,1);
+            if (config_->signalRegion()) // do nothing in CR for jet3
+               this->actionApplyBtagEfficiency(3, 1);
          }
          else // matched 1,3
          {
             this->actionApplyBtagEfficiency(1,1);
             this->actionApplyBtagEfficiency(2,2);
-            this->actionApplyBtagEfficiency(3,1);
+            if (config_->signalRegion()) // do nothing in CR for jet3
+               this->actionApplyBtagEfficiency(3,1);
 
          }
 
