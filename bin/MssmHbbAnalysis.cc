@@ -55,6 +55,8 @@ int main(int argc, char ** argv)
                 mssmhbb.actionApplyBtagSF(jet3);                              // btag scale factor
                 if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    // jet trg matching
                 if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    // jet trg matching
+                mssmhbb.actionApplyJetOnlineSF(jet1);
+                mssmhbb.actionApplyJetOnlineSF(jet2);
                 if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
                 // * Semileptonic - if muons not defined in the configuration, none of these have any effect
                 if ( ! mssmhbb.selectionMuonId()              ) continue;      // muon id selection
