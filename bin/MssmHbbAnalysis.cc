@@ -113,6 +113,7 @@ int main(int argc, char ** argv)
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
             if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
+            mssmhbb.actionApplyScaleCorrection("L1 prefiring");
             mssmhbb.endSelection();
         } // end loop
     } // end workflow 2
