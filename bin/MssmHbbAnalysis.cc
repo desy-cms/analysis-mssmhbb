@@ -13,9 +13,11 @@ int main(int argc, char ** argv)
     auto config = mssmhbb.config();
     auto workflow = config->workflow();
 
-    mssmhbb.jetHistograms(config->nJetsMin(),"NoMuonVeto");
-    mssmhbb.jetHistograms(config->nJetsMin(),"MuonVeto");
-
+    if ( config->muonsVeto() )
+    {
+        mssmhbb.jetHistograms(config->nJetsMin(),"NoMuonVeto");
+        mssmhbb.jetHistograms(config->nJetsMin(),"MuonVeto");
+    }
     // Jets in the analysis
     static constexpr int jet1 = 1;
     static constexpr int jet2 = 2;
@@ -71,9 +73,9 @@ int main(int argc, char ** argv)
             // * Semileptonic - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
-            mssmhbb.fillJetHistograms("NoMuonVeto");
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("NoMuonVeto");
             if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
-            mssmhbb.fillJetHistograms("MuonVeto");
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("MuonVeto");
             mssmhbb.endSelection();
         } // end loop
     } // end workflow 1
