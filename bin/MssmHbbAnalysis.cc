@@ -13,6 +13,11 @@ int main(int argc, char ** argv)
     auto config = mssmhbb.config();
     auto workflow = config->workflow();
 
+    if ( config->muonsVeto() )
+    {
+        mssmhbb.jetHistograms(config->nJetsMin(),"NoMuonVeto");
+        mssmhbb.jetHistograms(config->nJetsMin(),"MuonVeto");
+    }
     // Jets in the analysis
     static constexpr int jet1 = 1;
     static constexpr int jet2 = 2;
@@ -42,6 +47,7 @@ int main(int argc, char ** argv)
             mssmhbb.actionApplyJER();                                     // jet energy resolution applied
             if ( ! mssmhbb.selectionJet(jet1)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJet(jet2)             )  continue;    // jet selection
+            if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
             if ( ! mssmhbb.selectionJet(jet3)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJetDeta(jet1,jet2)    )  continue;    // jet deltaEta selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
@@ -66,9 +72,10 @@ int main(int argc, char ** argv)
             // ! ----
             // * Semileptonic - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
-            if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
-            if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("NoMuonVeto");
+            if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("MuonVeto");
             mssmhbb.endSelection();
         } // end loop
     } // end workflow 1
@@ -87,6 +94,7 @@ int main(int argc, char ** argv)
             mssmhbb.actionApplyJER();                                     // jet energy resolution applied
             if ( ! mssmhbb.selectionJet(jet1)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJet(jet2)             )  continue;    // jet selection
+            if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
             if ( ! mssmhbb.selectionJet(jet3)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJetDeta(jet1,jet2)    )  continue;    // jet deltaEta selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
@@ -111,9 +119,10 @@ int main(int argc, char ** argv)
             // ! ----
             // * Semileptonic - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
-            if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
-            if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
+            mssmhbb.fillJetHistograms("NoMuonVeto");
+            if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
+            mssmhbb.fillJetHistograms("MuonVeto");
             mssmhbb.endSelection();
         } // end loop
     } // end workflow 2
