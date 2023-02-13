@@ -109,11 +109,13 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
    // TODO: find a better algorithm
    if (online_btags.size() == 3) // matched 1,2,3
    {
-      for ( auto & r : ranks )
-         {
-            if ( ! config_-> signalRegion() && r == 3 ) continue; // do nothing in CR for jet3
-            this->actionApplyBtagEfficiency(r,1);
-         }
+      // for ( auto & r : ranks )
+      //    {
+      //       if ( ! config_-> signalRegion() && r == 3 ) continue; // do nothing in CR for jet3
+      //       this->actionApplyBtagEfficiency(r,1);
+      //    }
+      this->actionApplyBtagEfficiency(1, 1);
+      this->actionApplyBtagEfficiency(2, 1);
    }
    if (online_btags.size() == 2)
    {
@@ -121,8 +123,8 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
       {
          this->actionApplyBtagEfficiency(1,1);
          this->actionApplyBtagEfficiency(2,1);
-         if (config_->signalRegion()) // do nothing in CR for jet3
-            this->actionApplyBtagEfficiency(3,2);
+         // if (config_->signalRegion()) // do nothing in CR for jet3
+         //    this->actionApplyBtagEfficiency(3,2);
       }
       else
       {
@@ -130,15 +132,15 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
          {
             this->actionApplyBtagEfficiency(1,2);
             this->actionApplyBtagEfficiency(2,1);
-            if (config_->signalRegion()) // do nothing in CR for jet3
-               this->actionApplyBtagEfficiency(3, 1);
+            // if (config_->signalRegion()) // do nothing in CR for jet3
+            //    this->actionApplyBtagEfficiency(3, 1);
          }
          else // matched 1,3
          {
             this->actionApplyBtagEfficiency(1,1);
             this->actionApplyBtagEfficiency(2,2);
-            if (config_->signalRegion()) // do nothing in CR for jet3
-               this->actionApplyBtagEfficiency(3,1);
+            // if (config_->signalRegion()) // do nothing in CR for jet3
+            //    this->actionApplyBtagEfficiency(3,1);
 
          }
 
