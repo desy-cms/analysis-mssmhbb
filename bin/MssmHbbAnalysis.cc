@@ -100,9 +100,8 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet3)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet2,jet3)      )  continue;    // jet deltaR selection
-            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2 and 3, the latter only in signal region
-            if ( ! config->signalRegion() ) {// in CR apply reverse btag cut on the 3rd jet, otherwise already btag-weighted
-                if ( ! mssmhbb.selectionBJet(jet3)               )  continue; }
+            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2
+            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;
             if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    // jet trg matching
             if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    // jet trg matching
             mssmhbb.actionApplyJetOnlineSF(jet1);
