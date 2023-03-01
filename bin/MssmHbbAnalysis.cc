@@ -100,9 +100,8 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet3)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet2,jet3)      )  continue;    // jet deltaR selection
-            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2 and 3, the latter only in signal region
-            if ( ! config->signalRegion() ) {// in CR apply reverse btag cut on the 3rd jet, otherwise already btag-weighted
-                if ( ! mssmhbb.selectionBJet(jet3)               )  continue; }
+            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2
+            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;
             if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    // jet trg matching
             if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    // jet trg matching
             mssmhbb.actionApplyJetOnlineSF(jet1);
@@ -120,9 +119,9 @@ int main(int argc, char ** argv)
             // * Semileptonic - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
-            mssmhbb.fillJetHistograms("NoMuonVeto");
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("NoMuonVeto");
             if (   mssmhbb.muonVeto()                     )  continue;    // muon veto (for full hadronic)
-            mssmhbb.fillJetHistograms("MuonVeto");
+            if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("MuonVeto");
             mssmhbb.endSelection();
         } // end loop
     } // end workflow 2
