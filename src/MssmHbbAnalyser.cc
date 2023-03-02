@@ -98,7 +98,7 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
 {
    if ( config_->btagEfficiencies(1) == "" ) return ;  // will do nothing
 
-   std::string an_type="FH"; // TODO: get from configuration file
+   std::string an_type=config_->analysisType();
 
    std::vector<int> ranks = {1,2,3};
    auto online_btags = this->onlineBJetMatching(ranks); // returns matched jets
