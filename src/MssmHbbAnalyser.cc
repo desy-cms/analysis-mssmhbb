@@ -94,64 +94,95 @@ bool MssmHbbAnalyser::jetSelection()
       
 }
 
-
 void MssmHbbAnalyser::btagEfficiencyWeight()
 {
    if ( config_->btagEfficiencies(1) == "" ) return ;  // will do nothing
 
+   std::string an_type=config_->analysisType();
+
    std::vector<int> ranks = {1,2,3};
    auto online_btags = this->onlineBJetMatching(ranks); // returns matched jets
    std::sort(online_btags.begin(), online_btags.end());
-   // Full hadronic for the time being
-   // Efficiencies 1: FH with trigger
-   // Efficiencies 2: FH without trigger
 
-   // TODO: find a better algorithm
-   if (online_btags.size() == 3) // matched 1,2,3
-   {
-      // for ( auto & r : ranks )
-      //    {
-      //       if ( ! config_-> signalRegion() && r == 3 ) continue; // do nothing in CR for jet3
-      //       this->actionApplyBtagEfficiency(r,1);
-      //    }
-      this->actionApplyBtagEfficiency(1, 1);
-      this->actionApplyBtagEfficiency(2, 1);
-   }
-   if (online_btags.size() == 2)
-   {
-      if (online_btags[1] != 3)  // matched 1,2
-      {
-         this->actionApplyBtagEfficiency(1,1);
-         this->actionApplyBtagEfficiency(2,1);
-         // if (config_->signalRegion()) // do nothing in CR for jet3
-         //    this->actionApplyBtagEfficiency(3,2);
-      }
-      else
-      {
-         if (online_btags[0] != 1)  // matched 2,3
-         {
-            this->actionApplyBtagEfficiency(1,2);
-            this->actionApplyBtagEfficiency(2,1);
-            // if (config_->signalRegion()) // do nothing in CR for jet3
-            //    this->actionApplyBtagEfficiency(3, 1);
-         }
-         else // matched 1,3
-         {
-            this->actionApplyBtagEfficiency(1,1);
-            this->actionApplyBtagEfficiency(2,2);
-            // if (config_->signalRegion()) // do nothing in CR for jet3
-            //    this->actionApplyBtagEfficiency(3,1);
+   if ( an_type == "FH" ) btag_effw_fh(online_btags);
+   if ( an_type == "SL" ) btag_effw_sl(online_btags);
 
-         }
-
-      }
-   }
-
-   std::string label = "*** btag weight ***";
+   std::string label = Form("MSSMHbb: *** btag weight - %s ***",an_type.c_str());
    cutflow(label);
 }
 
+void MssmHbbAnalyser::btag_effw_fh(const std::vector<int> & online_btags)
+{
+   // Full hadronic for the time being (w/, w/o trigger means online btagging)
 
+   // Jets in the analysis
+   static constexpr int j1 = 1;
+   static constexpr int j2 = 2;
+
+   static constexpr int beff_with_trg = 1; // Efficiencies 1: FH with trigger
+   static constexpr int beff_no_trg = 2;   // Efficiencies 2: FH without trigger
+
+   // true for matched 1,2,3; matched 1,2
+   auto beff_j1 = beff_with_trg;
+   auto beff_j2 = beff_with_trg;
+
+   // TODO: find a better algorithm
+   if (online_btags.size() == 2 && online_btags [1] == 3)
+   {
+      if (online_btags[0] == 2) // matched 2,3
+      {
+         beff_j1 = beff_no_trg;
+      }
+      if (online_btags[0] == 1) // matched 1,3
+      {
+         beff_j2 = beff_no_trg;
+      }
+   }
+
+   this->actionApplyBtagEfficiency(j1, beff_j1);
+   this->actionApplyBtagEfficiency(j2, beff_j2);
+}
+
+void MssmHbbAnalyser::btag_effw_sl(const std::vector<int> & online_btags)
+{
+   // Full hadronic and semileptonic efficiencies (w/, w/o trigger means online btagging)r
+
+   // TODO: find a better algorithm
+
+   static constexpr int j1 = 1;
+   static constexpr int j2 = 2;
+
+   static constexpr int beff_with_trg = 1;    // Efficiencies 1: FH with trigger
+   static constexpr int beff_no_trg = 2;      // Efficiencies 2: FH without trigger
+   static constexpr int beff_mu_with_trg = 3; // Efficiencies 3: SL with trigger
+   static constexpr int beff_mu_no_trg = 4;   // Efficiencies 4: SL without trigger
+
+   // here it is assume that the muon jet association was done with muonJet() function
+   // in such case only one jet has a muon associated to it
+   auto jet1 = selectedJets_[0];
+   auto jet2 = selectedJets_[1];
+
+   auto beff_j1 = beff_with_trg;
+   auto beff_j2 = beff_with_trg;
+   if (jet1->muon()) beff_j1 = beff_mu_with_trg;
+   if (jet2->muon()) beff_j2 = beff_mu_with_trg;
+
+   if (online_btags.size() == 2 && online_btags[1] == 3)
+   {
+      if (online_btags[0] == 2) // matched 2,3
+      {
+         beff_j1 = beff_no_trg;
+         if (jet1->muon()) beff_j1 = beff_mu_no_trg;
+      }
+      if (online_btags[0] == 1) // matched 1,3
+      {
+         beff_j2 = beff_no_trg;
+         if (jet2->muon()) beff_j2 = beff_mu_no_trg;
+      }
+   }
+   this->actionApplyBtagEfficiency(j1, beff_j1);
+   this->actionApplyBtagEfficiency(j2, beff_j2);
+}
 
 bool MssmHbbAnalyser::btagSelection()
 {
