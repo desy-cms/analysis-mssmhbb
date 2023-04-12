@@ -52,15 +52,9 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionJetDeta(jet1,jet2)    )  continue;    // jet deltaEta selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet3)      )  continue;    // jet deltaR selection
-            if ( ! mssmhbb.selectionJetDr(jet2,jet3)      )  continue;    // jet deltaR selection
-            if ( ! mssmhbb.selectionBJet(jet1)            )  continue;    mssmhbb.actionApplyBtagSF(jet1); // btag selection // btag scale factor
-            if ( ! mssmhbb.selectionBJet(jet2)            )  continue;    mssmhbb.actionApplyBtagSF(jet2); // btag selection // btag scale factor                             
-            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;    mssmhbb.actionApplyBtagSF(jet3); // btag selection // btag scale factor                            
-            if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    // jet trg matching
-            if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    // jet trg matching
-            mssmhbb.actionApplyJetOnlineSF(jet1);
-            mssmhbb.actionApplyJetOnlineSF(jet2);
-            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            if ( ! mssmhbb.selectionJetDr(jet2,jet3)      )  continue;    // jet deltaR selection                           
+            if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    mssmhbb.actionApplyJetOnlineSF(jet1); // jet trg matching
+            if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    mssmhbb.actionApplyJetOnlineSF(jet2); // jet trg matching
             // * Semileptonic - if muons not defined in the configuration, none of these have any effect
             if ( ! mssmhbb.selectionMuonId()              ) continue;      // muon id selection
             if ( ! mssmhbb.selectionNMuons()              ) continue;
@@ -71,6 +65,12 @@ int main(int argc, char ** argv)
             mssmhbb.actionApplyMuonOnlineSF(muon1);                        // if there is a trigger, applies the muon scale factor
             // ! ----
             // * Semileptonic - end
+            // * BTagging
+            if ( ! mssmhbb.selectionBJet(jet1)            )  continue;    mssmhbb.actionApplyBtagSF(jet1);      // btag selection // btag scale factor
+            if ( ! mssmhbb.selectionBJet(jet2)            )  continue;    mssmhbb.actionApplyBtagSF(jet2);      // btag selection // btag scale factor                             
+            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;    mssmhbb.actionApplyBtagSF(jet3);      // btag selection // btag scale factor
+            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            // * BTagging end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
             if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("NoMuonVeto");
@@ -100,13 +100,8 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionJetDr(jet1,jet2)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet1,jet3)      )  continue;    // jet deltaR selection
             if ( ! mssmhbb.selectionJetDr(jet2,jet3)      )  continue;    // jet deltaR selection
-            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2
-            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;
-            if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    // jet trg matching
-            if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    // jet trg matching
-            mssmhbb.actionApplyJetOnlineSF(jet1);
-            mssmhbb.actionApplyJetOnlineSF(jet2);
-            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            if ( ! mssmhbb.onlineJetMatching(jet1)        )  continue;    mssmhbb.actionApplyJetOnlineSF(jet1); // jet trg matching
+            if ( ! mssmhbb.onlineJetMatching(jet2)        )  continue;    mssmhbb.actionApplyJetOnlineSF(jet2); // jet trg matching
             // * Semileptonic - if muons not defined in the configuration, none of these have any effect
             if ( ! mssmhbb.selectionMuonId()              ) continue;      // muon id selection
             if ( ! mssmhbb.selectionNMuons()              ) continue;
@@ -117,6 +112,11 @@ int main(int argc, char ** argv)
             mssmhbb.actionApplyMuonOnlineSF(muon1);                        // if there is a trigger, applies the muon scale factor
             // ! ----
             // * Semileptonic - end
+            // * BTagging - btag weights
+            mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2
+            if ( ! mssmhbb.selectionBJet(jet3)            )  continue;
+            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            // * BTagging - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
             if ( config->muonsVeto() ) mssmhbb.fillJetHistograms("NoMuonVeto");
@@ -127,23 +127,6 @@ int main(int argc, char ** argv)
     } // end workflow 2
 
 
-    // for ( int i = 0 ; i < mssmhbb.nEvents() ; ++i )
-    // {
-    //     if ( ! mssmhbb.event(i)             )  continue;    // read event, run selection/json
-    //     if ( ! mssmhbb.triggerSelection()   )  continue;    // trigger
-    //     if ( ! mssmhbb.jetSelector()        )  continue;    // jet selector (remove fake jets)
-    //     if ( ! mssmhbb.jetCorrections()     )  continue;    // jet corrections
-    //     if ( ! mssmhbb.jetSelection()       )  continue;    // jets
-    //     if ( ! mssmhbb.muonSelector()       )  continue;    // muon selector (remove fake muons)
-    //     if ( ! mssmhbb.muonSelection()      )  continue;    // muon selection
-    //     if ( ! mssmhbb.muonJetSelection()   )  continue;    // muon-jet association
-    //     if ( ! mssmhbb.btagSelection()      )  continue;    // btagging
-    //     if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_noveto");
-    //     if (   mssmhbb.muonVeto()           )  continue;    // muon veto (for full hadronic)
-    //     if ( config -> muonsVeto() ) mssmhbb.fillJetHistograms("final_muon_veto");
-    //     mssmhbb.actionApplyPrefiringWeight();
-    //     mssmhbb.endSelection();
-    // }
 } // end main
      
 

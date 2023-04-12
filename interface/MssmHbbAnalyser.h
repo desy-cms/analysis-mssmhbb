@@ -72,8 +72,8 @@ namespace analysis {
             double mbbw_;
                
          private:
-               
-
+            void btag_effw_fh(const std::vector<int> &);
+            void btag_effw_sl(const std::vector<int> &);
       };
    }
 }
