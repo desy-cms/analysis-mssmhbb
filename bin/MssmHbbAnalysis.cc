@@ -63,13 +63,14 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.onlineMuonMatching()           ) continue;      // if there is a trigger, keeps all muons matching to online
             if ( ! mssmhbb.muonJet()                      ) continue;      // keep only only one muon that is within a jet
             mssmhbb.actionApplyMuonOnlineSF(muon1);                        // if there is a trigger, applies the muon scale factor
+            mssmhbb.actionApplyMuonIDSF(muon1);                            // applies the muon ID scale factor
             // ! ----
             // * Semileptonic - end
             // * BTagging
             if ( ! mssmhbb.selectionBJet(jet1)            )  continue;    mssmhbb.actionApplyBtagSF(jet1);      // btag selection // btag scale factor
             if ( ! mssmhbb.selectionBJet(jet2)            )  continue;    mssmhbb.actionApplyBtagSF(jet2);      // btag selection // btag scale factor                             
             if ( ! mssmhbb.selectionBJet(jet3)            )  continue;    mssmhbb.actionApplyBtagSF(jet3);      // btag selection // btag scale factor
-            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;  mssmhbb.actionApplyBtagOnlineSF(bjets_matched);   // bjet trigger matching // online btag SF
             // * BTagging end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
@@ -110,12 +111,13 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.onlineMuonMatching()           ) continue;      // if there is a trigger, keeps all muons matching to online
             if ( ! mssmhbb.muonJet()                      ) continue;      // keep only only one muon that is within a jet
             mssmhbb.actionApplyMuonOnlineSF(muon1);                        // if there is a trigger, applies the muon scale factor
+            mssmhbb.actionApplyMuonIDSF(muon1);                            // applies the muon ID scale factor
             // ! ----
             // * Semileptonic - end
             // * BTagging - btag weights
             mssmhbb.btagEfficiencyWeight();  // btag weight on jets 1,2
             if ( ! mssmhbb.selectionBJet(jet3)            )  continue;
-            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;    // bjet trigger matching
+            if ( ! mssmhbb.onlineBJetMatching(bjets_matched, max_bjets_matched)) continue;  mssmhbb.actionApplyBtagOnlineSF(bjets_matched);    // bjet trigger matching // online btag SF
             // * BTagging - end
             mssmhbb.fsrCorrections(mssmhbb.mainJets(), mssmhbb.fsrCandidates()); // FSR better at the end, for it may bias the matching
             mssmhbb.actionApplyScaleCorrection("L1 prefiring");
