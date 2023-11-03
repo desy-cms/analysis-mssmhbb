@@ -45,6 +45,7 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionNJets()               )  continue;
             mssmhbb.actionApplyBjetRegression();                          // b jet regression applied
             mssmhbb.actionApplyJER();                                     // jet energy resolution applied
+            mssmhbb.actionApplyJEC();                                     // jet energy scale applied (for systematics)
             if ( ! mssmhbb.selectionJet(jet1)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJet(jet2)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
@@ -93,6 +94,7 @@ int main(int argc, char ** argv)
             if ( ! mssmhbb.selectionNJets()               )  continue;
             mssmhbb.actionApplyBjetRegression();                          // b jet regression applied
             mssmhbb.actionApplyJER();                                     // jet energy resolution applied
+            mssmhbb.actionApplyJEC();                                     // jet energy scale applied (for systematics)
             if ( ! mssmhbb.selectionJet(jet1)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionJet(jet2)             )  continue;    // jet selection
             if ( ! mssmhbb.selectionDiJetMass(jet1,jet2)  )  continue;
