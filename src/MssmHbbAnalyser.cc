@@ -101,7 +101,7 @@ void MssmHbbAnalyser::btagEfficiencyWeight()
    std::string an_type=config_->analysisType();
 
    std::vector<int> ranks = {1,2,3};
-   auto online_btags = this->onlineBJetMatching(ranks); // returns matched jets
+   auto online_btags = this->onlineBJetMatchedJets(ranks); // returns matched jets
    std::sort(online_btags.begin(), online_btags.end());
 
    if ( an_type == "FH" ) btag_effw_fh(online_btags);
